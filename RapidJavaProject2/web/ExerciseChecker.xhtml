@@ -1,0 +1,218 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Program Checker</title>
+
+        <script type='text/javascript' src='//code.jquery.com/jquery-2.0.2.js'></script>
+        <script type='text/javascript' src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js"></script>
+        <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.min.css" />
+
+        <style type='text/css'>
+            #editor {
+                /** Setting height is also important, otherwise editor wont showup**/
+                height: 175px;
+            }
+        </style>
+
+        <style type='text/css'>
+            #editor {
+                /** Setting height is also important, otherwise editor wont showup**/
+                height: 175px;
+                /*          font-family: monaco, monospace, courier;*/
+            }
+            .kwd { color: #008008 }  /* keyword */
+            .com { color: #800800;  }  /* comment */
+            /*      .com { color: #800800; background: #d1e0f0; }   comment */
+            .lit { color: #066066 }  /* literal value */
+            .str { color: #080080 } /* string */
+            .typ, .pun, .opn, .clo, .tag, .atn, .atv, .dec, .var, .fun { color: #000;} /* rest of the classes*/	
+
+            .ace-chrome .ace_keyword {
+                color: #000fd6 !important; 
+                font-weight: bold;
+            }
+            .ace_keyword.ace_operator {
+                color: black !important;
+            }
+            .ace_comment {
+                color: #005500 !important; 
+            }
+            .ace_constant {
+                color: #007d9f !important;
+            }
+            .ace_string {
+                color: #007d9f !important;
+            }
+        </style>
+
+        <script type='text/javascript'>
+            $(function () {
+                var textarea = $('#jsfForm\\:sourceInputTextarea');
+                var editor = ace.edit("editor");
+                editor.setTheme("ace/theme/chrome");
+                editor.getSession().setMode("ace/mode/java");
+                editor.getSession().setTabSize(2);
+                editor.getSession().on('change', function () {
+                    textarea.val(editor.getSession().getValue());
+                });
+                textarea.val(editor.getSession().getValue());
+                // Editor for result, just for display
+                var editorForResult = ace.edit("editorForResult");
+                editorForResult.setTheme("ace/theme/chrome");
+                editorForResult.getSession().setMode("ace/mode/c");
+                editorForResult.renderer.setShowGutter(false);
+                editorForResult.setReadOnly(true);
+                editorForResult.getSession().setUseWrapMode(true);
+                var editorForResult2 = ace.edit("editorForResult2");
+                
+                editorForResult2.setTheme("ace/theme/chrome");
+                editorForResult2.getSession().setMode("ace/mode/c");
+                editorForResult2.renderer.setShowGutter(false);
+                editorForResult2.setReadOnly(true);
+                editorForResult2.getSession().setUseWrapMode(true);
+            });
+        </script>
+        <!-- everything above here is for the ace editor and the style -->
+
+    </h:head>
+    <h:body style='width:100%; margin-right: 0 auto;'>
+
+        <h:form id = "jsfForm" style="margin: 0.5em; margin-bottom: 0.0em;">
+
+            <h:panelGrid id = "OuterPannel" style='width:100%; margin-right: 0 auto;'>
+                <h:panelGrid columns="2" bgcolor="darkgoldenrod" 
+                             style="font-family:sans-serif;font-size:18px;font-weight:bold;
+                             text-align:center;width:100%;border:5px ridge darkgoldenrod;background-color: darkgoldenrod">          
+                    <h:panelGroup>
+                        <h:outputLabel style="color:whitesmoke" value="Check Exercise:&#160;"/>
+                        <h:outputLabel style="color:whitesmoke" value="#{backendBean.titleLabel}"/>
+                        <h:outputLabel style="color:whitesmoke" value=".java"/>
+                    </h:panelGroup>
+                </h:panelGrid>
+
+                
+                <!-- this pane is for the check exercise button and the chapter and exercise scrollers -->
+                <h:panelGrid id = "chapterExercisePane" columns="1" 
+                             style="margin-top: 1px; padding: 2px; width:575px; background-color: white; 
+                             border: 1px solid #f6912f; font-weight: bold; font-size: 96%;
+                             width:100%; margin: 0 auto;">
+
+                    <h:panelGrid  id = "exerciseANDchapters" columns="6" style="margin-top: 1px; padding: 2px; width:575px; background-color: white; 
+                                  border: 1px  #f6912f; font-weight: bold; font-size: 96%;
+                                  width:600px; margin: 0 auto;">
+
+                        <h:outputLabel value="Choose a Chapter: " />
+                        <h:selectOneMenu value="#{backendBean.chapter}">
+                            <f:selectItems value="#{backendBean.chapters}"/>
+                            <f:ajax  listener="#{backendBean.changeChapter}" render="exercises" />
+                        </h:selectOneMenu> 
+
+                        <h:outputLabel value="Choose an Exercise: " />
+                        <h:selectOneMenu id = "exercises" value="#{backendBean.exercise}">
+                            <f:selectItems value="#{backendBean.exercises}"/>
+                            <f:ajax  listener="#{backendBean.changeExercises}" execute="@this"/>
+                        </h:selectOneMenu>
+
+                        <h:commandButton value="Set Exercise" class="btn btn-sm btn-primary" 
+                                         style ="font-style: normal; font-weight: normal; font-size: 100%"
+                                         action ="#{backendBean.setExerciseButton()}"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+
+                <div id="editor" style="width:575px; font-weight: normal; margin-top: 1px;height:177px; background-color: white; border: 1px solid #f6912f; font-size: 96%;height:257px; 
+                     width:100%; margin: 0 auto;">#{backendBean.codeBody}</div>
+                   
+                <div id = "inputLabel">
+                    <h:outputLabel value="#{backendBean.inputLabel}" 
+                                   style = "font-weight: bold; font-family: times; width:100%; margin: 0 auto;"
+                                   rendered="#{backendBean.hasInput}"/>
+                </div>
+
+                <!-- create a basic message to output -->
+                <h:inputTextarea id="dataInputTextarea" rendered="#{backendBean.hasInput}"
+                                 value="#{backendBean.inputString4Show}" style="font-family: Consolas, Menlo, Monaco,
+                                 Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, 
+                                 Courier New, monospace, serif, monospace !important; width:575px; 
+                                 height:40px; background-color: white; border: 1px solid #f6912f; 
+                                 font-weight: normal; font-size: 96%; margin-top: 0px;
+                                 width:100%; margin: 0 auto;"></h:inputTextarea>
+
+
+                <h:panelGroup style="margin-top:0px; width:100%; margin: 0 auto;">
+                    <!--this needs to be changed to a working compiler -->
+                    <h:commandButton value="Compile/Run" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"
+                                     action ="#{backendBean.compileAndRun()}"/>&nbsp;
+
+                    <!-- this needs to be changed to working code checker -->
+                    <!-- this needs to be changed to status of the grade -->
+                    <h:commandButton value="Automatic Check" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"
+                                     rendered="#{backendBean.canCompile}" action ="#{backendBean.automaticCheck()}"/>
+                    <h:outputLabel value = "#{backendBean.noCompileButton}" rendered="#{!backendBean.canCompile}"/>
+                    <h:outputLabel class ="gradingStatusStyle" style="width:300px;" value="#{backendBean.changeChapter()}"/>
+
+                </h:panelGroup>
+                <br/>
+                
+                <h:panelGrid id = "automaticCheck" bodyrows="7" rendered = "#{backendBean.hasRun}">
+                    <h:outputLabel value = "#{backendBean.automaticCheckLabel}"/>                    
+                    <h:panelGrid id = "automaticCheckBody" bodyrows="6" rendered = "#{!backendBean.isCorrect}">
+                        <h:panelGrid id = "inputPart" bodyrows="2" rendered = "#{backendBean.hasInput}">
+                            <h:outputLabel value = "Input"/>
+                            <pre>#{backendBean.currentInput}</pre>
+                        </h:panelGrid>
+                        <br/>
+                        <h:outputLabel value = "Your Output" style="background-color: #e31c3d"/>
+                        <pre>#{backendBean.formatedCompileOutput}</pre>
+                    <br/>
+                    <h:outputLabel value = "Correct Output" style="background-color: chartreuse;"/>
+                    <pre>#{backendBean.currentOutput}</pre> 
+                    </h:panelGrid>
+                </h:panelGrid>
+                <br/>
+
+                <h:panelGrid columns="1" rendered = "#{backendBean.isCompiled}">
+                    <h:outputLabel style="width:300px;" value="#{backendBean.compileMessage}"/>
+                    <div id="editorForResult" style="text-align: left; width:575px; 
+                         height:181px; font-weight: normal; font-size: 88%; 
+                         color: black; background-color: white; border: 1px solid; border-color: #f6912f;height:147px;;">#{backendBean.formatedCompileOutput}</div> 
+                </h:panelGrid>
+
+                <h:panelGroup id = "bottomMessage" rendered="#{backendBean.canCompile}" style="margin-top:0px; width:100%; margin: 0 auto;">
+                <div>
+                    <span style="font-style:bold; color:#e31c3d" >
+                        We recommend that you use this tool to test the code.
+                        If your code is wrong, the tool will display your output 
+                        and the correct output so to help you debug the error.
+                    </span>
+                    Compile/Run is provided for your convenience to compile and 
+                    run the code. The extra exercises are available for instructors.
+                    Email y.daniel.liang@gmail.com to request a copy of the extra exercises.
+                </div>
+                  </h:panelGroup>  
+                
+                
+                <h:outputLabel value = "#{backendBean.noCompileBottomText}" rendered="#{!backendBean.canCompile}"/>
+                
+                <br/>
+
+                <!-- ending message -->
+                <div class = "messageStyle" style="width:100%; margin: 0 auto;">Please report errors to 
+                    <a href="mailto:y.daniel.liang@gmail.com" style="text-decoration: none; color: green">Dr. Liang</a>
+
+                    <div>By Keeley and Zach</div>
+                </div>
+
+                <h:inputTextarea id="sourceInputTextarea" rendered ="true" required="false"
+                                 value="#{backendBean.codeBody}" style="font-family: courier; 
+                                 font-weight: bold; margin-top: 0px;
+                                 height:0px; background-color: white; border: 0px solid #f6912f; 
+                                 font-size: 96%; overflow:hidden; resize:none;  margin: 0 auto;">
+                </h:inputTextarea>
+            </h:panelGrid>
+        </h:form>      
+    </h:body>
+</html>
